@@ -5,6 +5,8 @@ Run from source with:  python -m garmin_coach.app
 """
 
 import queue
+import subprocess
+import sys
 import shutil
 import threading
 import tkinter as tk
@@ -20,6 +22,9 @@ from .textplan import describe, parse_text
 from .workouts import load_ledger, push_specs, remove_specs, spec_hash
 
 APP_NAME = "Garmin Coach"
+IS_MAC = sys.platform == "darwin"
+UI_FONT = "Helvetica Neue" if IS_MAC else "Segoe UI"
+MONO_FONT = "Menlo" if IS_MAC else "Consolas"
 EXAMPLE = """Thu - Threshold run
 - Warm-up: 12 min easy jog, drills, 4 x 20 sec strides
 - 4 x 6 min @ T-pace, 1 min jog
@@ -50,9 +55,9 @@ class App(tk.Tk):
         style = ttk.Style(self)
         if "vista" in style.theme_names():
             style.theme_use("vista")
-        style.configure("Big.TButton", font=("Segoe UI", 11, "bold"), padding=(14, 8))
-        style.configure("H.TLabel", font=("Segoe UI", 13, "bold"))
-        style.configure("Status.TLabel", font=("Segoe UI", 10))
+        style.configure("Big.TButton", font=(UI_FONT, 11, "bold"), padding=(14, 8))
+        style.configure("H.TLabel", font=(UI_FONT, 13, "bold"))
+        style.configure("Status.TLabel", font=(UI_FONT, 10))
 
         top = ttk.Frame(self, padding=(12, 10, 12, 0))
         top.pack(fill="x")
@@ -187,18 +192,18 @@ class App(tk.Tk):
         ttk.Button(bar, text="Show example", command=lambda: self.set_text(EXAMPLE)).pack(side="left", padx=3)
         ttk.Button(bar, text="Clear", command=lambda: self.set_text("")).pack(side="left", padx=3)
 
-        self.text = tk.Text(f, wrap="word", font=("Consolas", 11), undo=True, height=12)
+        self.text = tk.Text(f, wrap="word", font=(MONO_FONT, 11), undo=True, height=12)
         self.text.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=(6, 10))
         self.text.insert("1.0", EXAMPLE)
         self.text.bind("<<Modified>>", self.on_text_change)
 
         ttk.Label(f, text="2.  Check what will go on your watch", style="H.TLabel").grid(
             row=2, column=0, columnspan=2, sticky="w")
-        self.preview_box = tk.Text(f, wrap="none", font=("Consolas", 10), height=12, state="disabled",
+        self.preview_box = tk.Text(f, wrap="none", font=(MONO_FONT, 10), height=12, state="disabled",
                                    background="#f6f7f9", relief="flat")
         self.preview_box.grid(row=3, column=0, columnspan=2, sticky="nsew", pady=(6, 10))
         self.preview_box.tag_config("warn", foreground="#b45309")
-        self.preview_box.tag_config("head", font=("Consolas", 10, "bold"))
+        self.preview_box.tag_config("head", font=(MONO_FONT, 10, "bold"))
 
         bottom = ttk.Frame(f)
         bottom.grid(row=4, column=0, columnspan=2, sticky="ew")
@@ -316,7 +321,7 @@ class App(tk.Tk):
         self.inbox_btn.pack(side="left")
         ttk.Button(row2, text="Check now", command=self.check_inbox).pack(side="left", padx=8)
         ttk.Button(row2, text="Open folder", command=self.open_inbox_folder).pack(side="left")
-        self.inbox_log = tk.Text(f, height=14, font=("Consolas", 10), state="disabled", background="#f6f7f9",
+        self.inbox_log = tk.Text(f, height=14, font=(MONO_FONT, 10), state="disabled", background="#f6f7f9",
                                  relief="flat")
         self.inbox_log.pack(fill="both", expand=True, pady=(6, 0))
         return f
@@ -332,8 +337,13 @@ class App(tk.Tk):
     def open_inbox_folder(self):
         p = self.inbox_folder.get()
         if p and Path(p).is_dir():
-            import os
-            os.startfile(p)  # noqa: S606 (Windows)
+            if IS_MAC:
+                subprocess.run(["open", p], check=False)
+            elif sys.platform.startswith("win"):
+                import os
+                os.startfile(p)  # noqa: S606
+            else:
+                subprocess.run(["xdg-open", p], check=False)
 
     def log_inbox(self, msg):
         self.inbox_log.config(state="normal")
@@ -394,7 +404,7 @@ class App(tk.Tk):
         ttk.Button(bar, text="Copy report", command=self.copy_report).pack(side="left", padx=8)
         ttk.Label(f, text="Copy the report and send it to your coach, or paste it into an AI assistant for advice.",
                   style="Status.TLabel").pack(anchor="w", pady=4)
-        self.report_box = tk.Text(f, font=("Consolas", 10), wrap="none", state="disabled", background="#f6f7f9",
+        self.report_box = tk.Text(f, font=(MONO_FONT, 10), wrap="none", state="disabled", background="#f6f7f9",
                                   relief="flat")
         self.report_box.pack(fill="both", expand=True)
         self.after(500, self.show_report)

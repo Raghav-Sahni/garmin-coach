@@ -27,11 +27,20 @@ It's free, needs no subscription, and runs on your own computer.
 
 ## 1. Download
 
-➡️ **[Download GarminCoach.exe](../../releases/latest)** (Windows 10 / 11, about 17 MB)
+| Your computer | Download |
+|---|---|
+| 🪟 **Windows 10 / 11** | **[GarminCoach.exe](https://github.com/Raghav-Sahni/garmin-coach/releases/latest/download/GarminCoach.exe)** |
+| 🍎 **Mac** (M1 / M2 / M3 / M4, 2020 or newer) | **[GarminCoach-mac.zip](https://github.com/Raghav-Sahni/garmin-coach/releases/latest/download/GarminCoach-mac.zip)** |
 
-There's nothing to install. Save the file anywhere, for example your Desktop, and double-click it.
+There's nothing to install.
 
+**On Windows:** save the file anywhere, for example your Desktop, and double-click it.
 > **"Windows protected your PC"?** Windows shows this for any new app that isn't from a big company. Click **More info → Run anyway**. You only need to do this once.
+
+**On a Mac:** double-click the zip to unpack it, then drag **GarminCoach** into your **Applications** folder and open it.
+> **"GarminCoach can't be opened" / "Apple could not verify…"?** Macs show this for apps that aren't from the App Store. Click **Done** (not "Move to Bin"), then open **System Settings → Privacy & Security**. Scroll down and click **Open Anyway** next to GarminCoach, then confirm. You only need to do this once.
+>
+> Not sure which Mac you have? Click  → **About This Mac**. If it says **Chip: Apple M…**, this download is for you. Older Intel Macs aren't supported yet.
 
 ## 2. Connect your Garmin account (once)
 
@@ -118,8 +127,8 @@ Rep counting isn't perfect, especially for pull-ups and cable exercises. You can
 **It suddenly can't log in.**
 Garmin sometimes changes its login system. Download the newest version of the app from the link above.
 
-**Mac?**
-There's no Mac app yet. Mac users can run it with Python. See the next section.
+**Older Intel Mac?**
+The Mac download is for Apple Silicon (M1 and newer). On an Intel Mac, you can run it with Python; see the next section.
 
 ---
 
@@ -140,6 +149,6 @@ garmin-coach-app                   # open the desktop app
 
 Add `--profile NAME` to manage several Garmin accounts, for example a trainer handling multiple athletes.
 
-Build the Windows app with `pip install pyinstaller` and then `packaging\build_exe.bat`. Run the tests with `pip install -e .[dev]` and then `pytest`.
+Releases are built automatically. Push a tag like `v0.1.2`, and GitHub Actions builds the Windows `.exe` and the Mac app, self-tests both, and attaches them to the release (see `.github/workflows/build.yml`). To build for Windows locally, run `pip install pyinstaller`, then `packaging\build_exe.bat`. Run the tests with `pip install -e .[dev]` and then `pytest`.
 
 Data lives in `~/.garmin-coach/profiles/<name>/`. Built on [python-garminconnect](https://github.com/cyberjunky/python-garminconnect). Not affiliated with Garmin. MIT licensed.

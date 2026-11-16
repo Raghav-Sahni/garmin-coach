@@ -1,0 +1,82 @@
+name: Build apps
+
+# Builds GarminCoach.exe (Windows) and GarminCoach-mac.zip (Apple Silicon Macs).
+# Push a tag like v0.1.1 to build and attach both to that GitHub release.
+# "Run workflow" on the Actions tab builds them without releasing (download from the run's artifacts).
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            asset: GarminCoach.exe
+          - os: macos-latest
+            asset: GarminCoach-mac.zip
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install . pyinstaller pytest
+
+      - name: Tests
+        run: pytest -q tests
+
+      - name: Build
+        shell: bash
+        run: |
+          python -m PyInstaller --noconfirm --onefile --windowed --name GarminCoach \
+            --collect-submodules garminconnect --collect-submodules garmin_coach \
+            --distpath dist --workpath build --specpath build packaging/launch.py
+
+      - name: Self-test the built app (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          ./dist/GarminCoach.exe --selftest selftest.txt
+          for i in $(seq 1 30); do [ -s selftest.txt ] && break; sleep 1; done
+          cat selftest.txt
+          grep -q "Dumbbell Bench Press" selftest.txt
+          grep -q "6:02-6:15/km" selftest.txt
+
+      - name: Self-test the built app (Mac) and zip it
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          ./dist/GarminCoach.app/Contents/MacOS/GarminCoach --selftest "$PWD/selftest.txt"
+          cat selftest.txt
+          grep -q "Dumbbell Bench Press" selftest.txt
+          grep -q "6:02-6:15/km" selftest.txt
+          ditto -c -k --keepParent dist/GarminCoach.app dist/GarminCoach-mac.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: dist/${{ matrix.asset }}
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
+            gh release create "$GITHUB_REF_NAME" --title "Garmin Coach ${GITHUB_REF_NAME#v}" \
+              --notes "Download **GarminCoach.exe** (Windows) or **GarminCoach-mac.zip** (Mac). See the README for first-run steps."
+          gh release upload "$GITHUB_REF_NAME" "dist/${{ matrix.asset }}" --clobber
