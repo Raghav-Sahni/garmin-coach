@@ -1,0 +1,12 @@
+# personal data - never share
+.env
+config.json
+data/
+report.md
+*.egg-info/
+__pycache__/
+.pytest_cache/
+build/
+dist/
+# your own weekly plans
+workouts/

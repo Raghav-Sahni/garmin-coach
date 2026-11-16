@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "garmin-coach"
+version = "0.1.0"
+description = "Free tool to pull your Garmin data and put workouts on your watch from plain text files"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = ["garminconnect>=0.3.20"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+garmin-coach = "garmin_coach.cli:main"
+
+[project.gui-scripts]
+garmin-coach-app = "garmin_coach.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
