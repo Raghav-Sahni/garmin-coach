@@ -143,6 +143,10 @@ def test_chat_sentences_are_not_workouts():
     ("DB bench", "Dumbbell Bench Press"), ("pull-ups", "Pull-up"), ("RDLs", "Romanian Deadlift"),
     ("KB swings", "Kettlebell Swing"), ("lat pulldown", "Lat Pull-down"), ("goblet squats", "Goblet Squat"),
     ("wall balls", "Wall Ball"), ("SkiErg", "Cardio"), ("row", "Rowing Machine"),
+    ("Incline barbell or DB bench press", "Incline Barbell Bench Press"),
+    ("Half-kneeling landmine press", "Single-arm Dumbbell Shoulder Press"),
+    ("rope triceps pushdown", "Triceps Press-down"), ("Cable row", "Seated Cable Row"),
+    ("Seal row or inverted row", "Inverted Row"), ("Ab wheel or Pallof press", "Kneeling Ab Wheel"),
     ("box jumps", "Box Jump"), ("hip thrusts", "Barbell Hip Thrust with Bench"), ("burpees", "Burpee"),
 ])
 def test_names(text, expected):

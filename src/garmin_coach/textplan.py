@@ -118,6 +118,10 @@ ALIASES = {
     "scap push up": "Push-up Plus", "scapular push up": "Push-up Plus",
     "bent over row": "Barbell Row", "dip": "Body-weight Dip", "tricep dip": "Body-weight Dip",
     "lat pull down": "Lat Pull-down", "lat pulldown": "Lat Pull-down",
+    "landmine press": "Single-arm Dumbbell Shoulder Press",  # no landmine moves in Garmin's catalog
+    "tricep push down": "Triceps Press-down", "tricep pushdown": "Triceps Press-down",
+    "push down": "Triceps Press-down", "pushdown": "Triceps Press-down", "tricep press down": "Triceps Press-down",
+    "cable row": "Seated Cable Row", "seated row": "Seated Cable Row",
     "kettlebell swing": "Kettlebell Swing", "swing": "Kettlebell Swing",
 }
 
@@ -193,6 +197,10 @@ def match_one(text):
 def match_exercise(text, fallback="Total Body"):
     """Return (catalog name, quality). 'A or B' tries both and keeps the better match."""
     alts = [a for a in re.split(r"\s+or\s+|\s*/\s*", text, flags=re.I) if a.strip()] or [text]
+    if len(alts) > 1:
+        # "Incline barbell or DB bench press": the first option borrows the shared ending ("bench press")
+        tail = " ".join(alts[-1].split()[-2:])
+        alts = [x for a in alts[:-1] for x in (a, f"{a.strip()} {tail}")] + alts[-1:]
     results = [match_one(a) for a in alts]
     name, q = min(results, key=lambda r: QUALITY_RANK[r[1]])
     return (name, q) if name else (fallback, "unknown")
